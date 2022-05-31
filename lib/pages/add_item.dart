@@ -133,7 +133,7 @@ class _AddAuctionItemState extends State<AddAuctionItem> {
                       "title" : title,
                       "description" : description,
                       "imageURL" : imageURL,
-                      "timestamp" : pickedDateTime,
+                      "timestamp" : Timestamp.fromDate(pickedDateTime!),
                       "seller" : FirebaseAuth.instance.currentUser!.email,
                       "bidPrice" : 0,
                       "bidder" : "",

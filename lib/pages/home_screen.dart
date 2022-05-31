@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auctioneer/models/auction_page.dart';
 import 'package:auctioneer/pages/add_item.dart';
 import 'package:auctioneer/pages/bidding_page.dart';
@@ -12,86 +14,93 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+  int chosenIndex = 0;
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Auctioneer"),
-          bottom: const TabBar(
-              tabs: [
-                Tab(
-                  icon: Icon(Icons.handshake),
-                  text: "Current Auctions",
-                ),
-                Tab(
-                  icon: Icon(Icons.shopping_bag),
-                  text: "Future Auctions",
-                ),
-                Tab(
-                  icon: Icon(Icons.door_back_door_outlined),
-                  text: "Past Auctions",
-                ),
-              ]
-          ),
-        ),
-        body: TabBarView(
-            children: [
-              StreamBuilder(
-                stream: FirebaseFirestore.instance.collection('auction_items').orderBy("timestamp", descending: false).where("timestamp", isLessThan: DateTime.now(), isGreaterThan: DateTime.now().subtract(Duration(minutes: 30))).snapshots(),
-                builder: (context, AsyncSnapshot snapshot){
-                  List<Widget> currentAuctionItems = [];
-                  if(snapshot.hasData){
-                    snapshot.data!.docs.forEach((value) => {
-                      currentAuctionItems.add(ListItemWidget(id: value.id ,title: value["title"], sellerEmail: value["seller"], bidPrice: value["bidPrice"] ,description: value["description"], imageURL: value["imageURL"], date: value["timestamp"].toDate().toLocal(),bidderEmail: value["bidder"],))
-                    });
-                    return ListView(
-                      children: currentAuctionItems,
-                    );
-                  }
-                  return Center(child: CircularProgressIndicator(),);
-                },
-              ),
-              StreamBuilder(
-                stream: FirebaseFirestore.instance.collection('auction_items').orderBy("timestamp", descending: false).where("timestamp", isGreaterThan: DateTime.now()).snapshots(),
-                builder: (context, AsyncSnapshot snapshot){
-                  List<Widget> currentAuctionItems = [];
-                  if(snapshot.hasData){
-                    snapshot.data!.docs.forEach((value) => {
-                      currentAuctionItems.add(ListItemWidget(id: value.id,title: value["title"], bidPrice: value["bidPrice"] ,sellerEmail: value["seller"], description: value["description"], imageURL: value["imageURL"], date: value["timestamp"].toDate().toLocal(),bidderEmail: value["bidder"]))
-                    });
-                    return ListView(
-                      children: currentAuctionItems,
-                    );
-                  }
-                  return Center(child: CircularProgressIndicator(),);
-                },
-              ),
-              StreamBuilder(
-                stream: FirebaseFirestore.instance.collection('auction_items').orderBy("timestamp", descending: false).where("timestamp", isLessThan: DateTime.now().subtract(Duration(minutes: 30))).snapshots(),
-                builder: (context, AsyncSnapshot snapshot){
-                  List<Widget> currentAuctionItems = [];
-                  if(snapshot.hasData){
-                    snapshot.data!.docs.forEach((value) => {
-                      currentAuctionItems.add(ListItemWidget(id: value.id,title: value["title"], bidPrice: value["bidPrice"] ,sellerEmail: value["seller"], description: value["description"], imageURL: value["imageURL"], date: value["timestamp"].toDate().toLocal(),bidderEmail: value["bidder"]))
-                    });
-                    return ListView(
-                      children: currentAuctionItems,
-                    );
-                  }
-                  return Center(child: CircularProgressIndicator(),);
-                },
-              ),
-            ]
-        ),
-        floatingActionButton: FloatingActionButton(
-            onPressed: (){
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddAuctionItem()));
-            },
-          child: Icon(Icons.add),
-        )
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Auctioneer"),
       ),
+      body: IndexedStack(
+        index: chosenIndex,
+          children: [
+            StreamBuilder(
+              stream: Stream.periodic(Duration(seconds: 5)).asyncMap((event) async {
+                QuerySnapshot toRtnSnapshot = await FirebaseFirestore.instance.collection('auction_items').orderBy("timestamp", descending: false).where("timestamp", isLessThan: Timestamp.fromDate(DateTime.now()), isGreaterThan: Timestamp.fromDate(DateTime.now().subtract(Duration(minutes: 30)))).get();
+                return toRtnSnapshot;
+              }),
+              builder: (context, AsyncSnapshot snapshot){
+                List<Widget> currentAuctionItems = [];
+                if(snapshot.hasData){
+                  print(snapshot.data!);
+                  snapshot.data!.docs.forEach((value) => {
+                    currentAuctionItems.add(ListItemWidget(id: value.id ,title: value["title"], sellerEmail: value["seller"], bidPrice: value["bidPrice"] ,description: value["description"], imageURL: value["imageURL"], date: value["timestamp"].toDate().toLocal(),bidderEmail: value["bidder"],))
+                  });
+                  return ListView(
+                    children: currentAuctionItems,
+                  );
+                }
+                return Center(child: CircularProgressIndicator(),);
+              },
+            ),
+            StreamBuilder(
+              stream: Stream.periodic(Duration(seconds: 5)).asyncMap((event) async {
+                QuerySnapshot toRtnSnapshot = await FirebaseFirestore.instance.collection('auction_items').orderBy("timestamp", descending: false).where("timestamp", isGreaterThan : Timestamp.fromDate(DateTime.now())).get();
+                return toRtnSnapshot;
+              }),
+              builder: (context, AsyncSnapshot snapshot){
+                List<Widget> currentAuctionItems = [];
+                if(snapshot.hasData){
+                  snapshot.data!.docs.forEach((value) => {
+                    currentAuctionItems.add(ListItemWidget(id: value.id,title: value["title"], bidPrice: value["bidPrice"] ,sellerEmail: value["seller"], description: value["description"], imageURL: value["imageURL"], date: value["timestamp"].toDate().toLocal(),bidderEmail: value["bidder"]))
+                  });
+                  return ListView(
+                    children: currentAuctionItems,
+                  );
+                }
+                return Center(child: CircularProgressIndicator(),);
+              },
+            ),
+            StreamBuilder(
+              stream: Stream.periodic(Duration(seconds: 5)).asyncMap((event) async {
+                QuerySnapshot toRtnSnapshot = await FirebaseFirestore.instance.collection('auction_items').orderBy("timestamp", descending: false).where("timestamp", isLessThan: Timestamp.fromDate(DateTime.now().subtract(Duration(minutes: 30)))).get();
+                return toRtnSnapshot;
+              }),
+              builder: (context, AsyncSnapshot snapshot){
+                List<Widget> currentAuctionItems = [];
+                if(snapshot.hasData){
+                  snapshot.data!.docs.forEach((value) => {
+                    currentAuctionItems.add(ListItemWidget(id: value.id,title: value["title"], bidPrice: value["bidPrice"] ,sellerEmail: value["seller"], description: value["description"], imageURL: value["imageURL"], date: value["timestamp"].toDate().toLocal(),bidderEmail: value["bidder"]))
+                  });
+                  return ListView(
+                    children: currentAuctionItems,
+                  );
+                }
+                return Center(child: CircularProgressIndicator(),);
+              },
+            ),
+          ]
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: chosenIndex,
+        onTap: (index){
+          setState((){
+            chosenIndex=index;
+          });
+        },
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.add),label: "Current"),
+            BottomNavigationBarItem(icon: Icon(Icons.add),label: "Future"),
+            BottomNavigationBarItem(icon: Icon(Icons.add),label: "Past"),
+          ]),
+      floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddAuctionItem()));
+          },
+        child: Icon(Icons.add),
+      )
     );
   }
 }
