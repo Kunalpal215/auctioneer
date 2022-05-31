@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "385188717459",
+    "project_id": "auctioneer-3cc92",
+    "storage_bucket": "auctioneer-3cc92.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:385188717459:android:13f86f040ea3d9a569be66",
+        "android_client_info": {
+          "package_name": "com.example.auctioneer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "385188717459-smakc044jm9afim5vfg54aqg7ergqpf2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLVV2_A2HZcYQiiIx54Y9gH9xrnEPiUfQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "385188717459-smakc044jm9afim5vfg54aqg7ergqpf2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
